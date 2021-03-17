@@ -1,0 +1,1 @@
+{"Temperature": 87.125, "l_on": false, "Kp": -1.0, "p_term": -0.125, "pidVal": -0.125, "time": 18910.0, "T_err_sum": -3219.4680000000903, "d_term": -0.0, "Ki": 0.0, "i_term": -0.0, "Kd": -100.0, "dT_err": 0.0, "T_set": 87.0, "T_error": 0.125}

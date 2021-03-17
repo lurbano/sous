@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+		<script type="text/javascript" src="jquery-3.2.1.min.js"> </script>
+		<script type="text/javascript" src="moment.js"> </script>
+		<script type="text/javascript" src="Chart.min.js"> </script>
+		<script type="text/javascript" src="jquery.csv.min.js"> </script>
+
+		<title> my Sous Vide </title>
+
+		<style type="text/css">
+			body {
+				background-color: #FFF7DE;
+				color: black;
+				font-family: Arial, Helvetica, sans-serif;
+				}
+			.data_block {
+				text-align: center;
+				width: 24%;
+				border: 1px groove dimgrey;
+				border-radius: 2px;
+				margin: .5%;
+				position: absolute;
+				top: 70px;
+				height:80px;
+			}
+			.item_head {
+				font-size: 1em;
+				text-decoration: underline;
+			}
+			.data{
+				font-size: 2em;
+			}
+			.data_2{
+				font-size: 1.25em;
+			}
+
+			#observation_time {
+				position: absolute;
+				top:50px;
+				height: 15px;
+			}
+			#pressure {
+				left: 25%;
+			}
+			#humidity {
+				left: 50%;
+			}
+			#temp_graph {
+				position: absolute;
+				top: 100px;
+				background-color: white;
+			}
+
+			table {
+				border: 1px solid black;
+			}
+			th {
+				background-color: #DEE6FF;
+				margin: 5px 10px;
+				border: inherit;
+			}
+			td {
+				border: 1px solid black;
+				text-align: center;
+			}
+
+			.table_caption {
+				font-size: 60%;
+				font-style:italic;
+			}
+
+		</style>
+
+		<script type="text/javascript">
+
+
+			function update_xml_data_element(element){
+				$("#"+element).html($xml.find(element).html());
+			}
+			function update_with_conversion(element, out_element, func) {
+				var x = $xml.find(element).html();
+				var y = func(x);
+				$("#"+out_element).html(y);
+			}
+
+
+			function generate_graph(tdata){
+				//Generate graph
+				ctx = $("#temp_graph");
+				t_chart = new Chart(ctx, {
+					type: 'scatter',
+					data: {
+						datasets: [{
+							label: "Forecast Temperature.",
+							data: tdata
+						}]
+					},
+					options: {
+						scales: {
+							xAxes: [{
+								//type: 'time',
+								position: 'bottom'
+								// time: {
+								// 	unit: 'day',
+								// 	unitStepSize: 1
+								// }
+							}],
+							yAxes: [{
+								scaleLabel: {
+									display: true,
+									labelString: "Degrees Celsius"
+								}
+							}]
+						}
+					}
+				});
+
+			}
+
+			////////////////////
+			function get_T_data(){
+				$( "#T_table" ).html("retriving data ...");
+				$.ajax({
+					url: "./logs/T_data.txt",
+					cache: false,
+					success: function( data ) {
+						var result = $.csv.toObjects(data);
+						// $( "#T_table" ).html( JSON.stringify(result) );
+						// $( "#T_table" ).append( '<p>' );
+
+
+
+						var tdata = [];
+						$.each(result, function(k, v){
+							// $( "#T_table" ).append(k+": "+v+"<br>");
+							// $( "#T_table" ).append("time="+v.time+", ");
+							// $( "#T_table" ).append("T="+v.Temperature+"<br>");
+							var tm = v.time;
+							var T = v.Temperature;
+							var pt = {x: tm, y: T};
+							tdata.push(pt);
+
+
+
+							// $.each(v, function(k1, v1){
+							// 	$( "#T_table" ).append(k1+": "+v1+"| |");
+							// });
+						});
+						generate_graph(tdata);
+						//var txt = "Graph updated at: "+result[result.length-1].time+", " + "T= " + result[result.length-1].Temperature + "<br>";
+
+						var txt = "Graph updated at: " + moment().toDate();
+						$( "#T_table" ).html(txt);
+
+
+
+
+						//var result = $.csv.toArrays(data);
+						//$( "#T_table" ).append( '<p>' );
+						//$( "#T_table" ).append( JSON.stringify(result) );
+					}
+				});
+			}
+
+			function get_T_recent(){
+				$( "#T_table" ).html("retriving data ...");
+				$.ajax({
+					url: "./logs/current_data.json",
+					dataType: "json",
+					cache: false,
+					success: function( data ) {
+						//$( "#current" ).html( JSON.stringify(data) );
+
+						//var txt = parseInt(data.time) + " sec.";
+						var txt = secToDHMS(parseInt(data.time))
+
+						//var dtime = parseInt(data.time);
+						//var txt = moment.duration(dtime, "seconds").format("hh:mm:ss")
+						$( "#time" ).html( txt );
+						$( "#Temp" ).html( data.Temperature + " &deg;C" );
+
+						//var result = $.csv.toArrays(data);
+						//$( "#T_table" ).append( '<p>' );
+						//$( "#T_table" ).append( JSON.stringify(result) );
+					}
+				});
+			}
+
+			function str_pad_left(string,pad,length) {
+			    return (new Array(length+1).join(pad)+string).slice(-length);
+			}
+
+			function secToDHMS(secs){
+				var dys = ~~(secs / (60*60*24))
+				var hrs = ~~(secs / 3600);
+    		var mins = ~~((secs % 3600) / 60);
+    		var secs = secs % 60;
+				return str_pad_left(hrs,"0", 2) + ":" + str_pad_left(mins,"0", 2) + ":" + str_pad_left(secs,"0", 2);
+			}
+
+			$(document).ready(function(){
+				get_T_recent()
+				recents = setInterval("get_T_recent()", 10*1000);
+				get_T_data();
+
+				//updates = setInterval("update_forecasts()", 1000*60*30);
+				//update_time();
+				//set_timer = setInterval("update_time()", 60*1000);
+
+			});
+		</script>
+
+	</head>
+
+	<body>
+		<table id="current">
+			<tr>
+		    <td colspan="2" class="table_caption"> Crockpot Sous Vide <br> Current Data </td>
+		  </tr>
+		  <tr>
+		    <th>Time</th>
+		    <th>Temperature</th>
+		  </tr>
+		  <tr>
+		    <td id="time"></td>
+		    <td id="Temp"></td>
+		  </tr>
+		</table>
+
+		<div id="T_table">
+		</div>
+
+		<canvas id="temp_graph" width="400" height="200"></canvas>
+
+	</body>
+
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+		<title> my Sous Vide </title>
+
+		<script type="text/javascript" src="jquery-3.2.1.min.js"> </script>
+		<script type="text/javascript" src="moment.js"> </script>
+		<script type="text/javascript" src="Chart.min.js"> </script>
+		<script type="text/javascript" src="jquery.csv.min.js"> </script>
+		<script type="text/javascript" src="sous.js"> </script>
+
+
+		 <link rel="stylesheet" type="text/css" href="sous.css">
+
+
+
+		<script type="text/javascript">
+
+
+			$(document).ready(function(){
+
+				// SET UP CONTROL PANEL CONTROLS
+				insert_control_panel();
+				get_settings();
+
+				get_T_recent();
+				recents = setInterval("get_T_recent()", 10*1000);
+				get_T_data(false);
+				graphing = setInterval("get_T_data(true)", 10*1000);
+
+				//updates = setInterval("update_forecasts()", 1000*60*30);
+				//update_time();
+				//set_timer = setInterval$("update_time()", 60*1000);
+
+				$("#set_T_but").click(function(){
+					set_T();
+				});
+
+				$(".K_param_input").change(function(){
+					var v = $(this).val();
+					var id = this.id.split("_")[0];
+					if ($.isNumeric(v)){
+						console.log(id + ":" + v);
+						set_K(id, v);
+					} else {
+						alert("Needs to be a number.");
+					}
+				});
+
+
+			});
+		</script>
+
+	</head>
+
+	<body>
+		<div id="current_table">
+			<table id="current">
+				<tr>
+			    <td colspan="2" class="table_caption"> Crockpot Sous Vide <br> Current Data </td>
+			  </tr>
+			  <tr>
+			    <th>Time (t)</th>
+			    <th>Temperature (T)</th>
+			  </tr>
+			  <tr>
+			    <td id="time"></td>
+			    <td id="Temp"></td>
+			  </tr>
+				<tr>
+			    <th>Heat</th>
+			    <td id="heat"></td>
+			  </tr>
+			</table>
+		</div>
+
+		<div id="timer">
+			<table>
+				<tr>
+					<th style="width:3em;">&Delta;t</th>
+					<td style="width:8em;" id="Dt"></td>
+				</tr>
+			</table>
+		</div>
+
+
+		<div id="pid_table">
+			<table>
+				<tr>
+					<td colspan="6" class="table_caption"> PID Calculation </td>
+				</tr>
+			  <tr>
+			    <th>Kp</th>
+					<td id="Kp">
+						<input type="text" id="Kp_in" class="K_param_input">
+					</td>
+			    <th>e</th>
+			    <td id="T_error"></td>
+					<td>=</td>
+					<td id="p_term"></td>
+			  </tr>
+			  <tr>
+					<th>Ki</th>
+					<td id="Ki">
+						<input type="text" id="Ki_in" class="K_param_input">
+					</td>
+			    <th> e<sub>sum</sub> </th>
+			    <td id="T_err_sum"></td>
+					<td>=</td>
+					<td id="i_term"></td>
+			  </tr>
+			  <tr>
+					<th>Kd</th>
+					<td id="Kd">
+						<input type="text" id="Kd_in" class="K_param_input">
+					</td>
+			    <th>de/dt</th>
+			    <td id="dT_err"></td>
+					<td>=</td>
+					<td id="d_term"></td>
+			  </tr>
+			  <tr>
+			    <th colspan="5">PID Value</th>
+			    <td id="pidVal"></td>
+			  </tr>
+			</table>
+		</div>
+
+		<div id="control_panel">
+			<table style="width:220px;">
+				<tr>
+					<th colspan=4>Control Panel</th>
+				</tr>
+			  <tr>
+					<td style="width:60px;" class="col_label"> Check Current Temperature </td>
+			    <th style="width:50px;"><div id="T_check"></div></th>
+			    <td style="width:40px;" id="T_check_output"></td>
+					<td style="width:50px;"id="T_check_time" class="table_caption"></td>
+			  </tr>
+				<tr>
+					<td class="col_label"> Set Target Temperature </td>
+					<th><input type="button" class="set_button" id="set_T_but" value="Set T."></th>
+					<td id="set_T"></td>
+				</tr>
+			  <tr>
+					<td class="col_label"> Run<br>Sous Vide Program </td>
+			    <th><div id="runCrock"></div></th>
+			    <td id="CrockRunning"></td>
+			  </tr>
+			</table>
+
+		</div>
+
+
+		<div id="recipes">
+			References:<br>
+			-<a href="https://www.foodsafety.gov/keep/charts/mintemp.html"> Safe Cooking Temperatures</a><br>
+			-<a href="http://www.racheltheriveter.com/recipe/sous-vide-garlic-confit/">Garlic Comfit</a><br>
+			-<a href="https://www.seriouseats.com/recipes/2015/07/sous-vide-chicken-breast-recipe.html">Chicken Breast</a><br>
+			-<a href="https://www.seriouseats.com/2015/06/food-lab-complete-guide-to-sous-vide-steak.html#tempchart2">Steak</a><br>
+			-<a href="https://www.seriouseats.com/2016/04/food-lab-complete-guide-to-sous-vide-pork-chops.html#temp">Pork Chops</a><br>
+
+		</div>
+
+
+		<canvas id="temp_graph" width="400" height="200"></canvas>
+
+	</body>
+
+</html>

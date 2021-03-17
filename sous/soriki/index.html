@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+		<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+
+		<title> Find My Pi </title>
+
+		<style type="text/css">
+		</style>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$.ajax({
+					url: "ip_log.json",
+					dataType: "json",
+					cache: false,
+					success: function( data ) {
+
+						$( "#time" ).html( data.time );
+						$( "#pi_id" ).html( data.id );
+						var txt = '<a href="http://'+data.hostname+'/sous/">' + data.hostname + '/sous/</a>';
+						$( "#ip" ).html( txt );
+
+					}
+				});
+
+			});
+		</script>
+
+	</head>
+
+	<body>
+		Time: <div id="time"></div><br>
+		Id: <div id="pi_id"></div><br>
+		ip: <div id="ip"></div><br>
+	</body>
+
+</html>
