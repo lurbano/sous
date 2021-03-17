@@ -1,0 +1,3 @@
+p_term,d_term,l_on,T_set,Temperature,T_error,time,i_term,dT_err,pidVal,Start=2018-03-26 11:11
+0.0,0.0,True,45.0,22.625,-22.375,0.0,0.0,0.0,0.0
+22.375,-0.0,True,45.0,22.625,-22.375,10.0,-0.0,0.0,22.375

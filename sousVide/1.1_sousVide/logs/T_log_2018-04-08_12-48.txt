@@ -1,0 +1,2 @@
+d_term,l_on,Kp,Kd,i_term,Temperature,p_term,dT_err,T_err_sum,T_set,T_error,time,pidVal,Ki,Start=2018-04-08 12:48
+0.0,True,-1.0,-100,0.0,12.062,0.0,0.0,-47.938,60.0,-47.938,0.0,0.0,0
